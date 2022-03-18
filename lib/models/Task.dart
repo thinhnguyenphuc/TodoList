@@ -6,21 +6,18 @@ class Task{
 
   Task({required this.id ,required this.title,required this.description,required this.time});
 
-  factory Task.fromJson(Map<String, dynamic> json) {
-    return Task(
-        id: json["id"],
-        title: json["title"],
-        description: json["description"],
-        time: json["time"]
-    );
-  }
+  Task.fromJson(Map<String, dynamic> json)
+      : id= json["id"],
+        title= json["title"],
+        description= json["description"],
+        time= DateTime.parse(json["time"]);
 
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toJson(){
     return{
       'id': id,
       'title': title,
       'description': description,
-      'time': time,
+      'time': time.toIso8601String(),
     };
   }
 }

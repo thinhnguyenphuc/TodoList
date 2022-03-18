@@ -1,33 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:todolist/database/TaskDatabase.dart';
 
 import '../models/Task.dart';
 
 class HomeViewModel with ChangeNotifier {
-  static final List<Task> _taskList = [];
+  static late List<Task> _taskList = [];
   static final List<Task> _searchTaskList = [];
   static final List<Task> _todayTaskList = [];
   static final List<Task> _upcomingTaskList = [];
-  static final List<Task> _doneTaskList = [];
+  static late List<Task> _doneTaskList = [];
   static int _idCount = 0;
+  static TaskDatabase taskDatabase = TaskDatabase();
+  bool loaded = false;
 
-  HomeViewModel(){
-    _initTodayList();
-    _initUpComingList();
+  HomeViewModel() {
+    _initTaskList();
+    _initDoneTaskList();
   }
 
-  void _initTodayList(){
+  bool isLoaded(){
+    return loaded;
+  }
+  
+  void _initTaskList() async {
+    await taskDatabase
+        .getTaskList("taskList")
+        .then((value) => _taskList = value)
+        .whenComplete(() =>
+            {_initUpComingList(), _initTodayList(), loaded = true});
+  }
+
+  void _initDoneTaskList() async {
+    await taskDatabase.getTaskList("doneList").then((value) => _doneTaskList = value);
+  }
+
+  void _initTodayList() {
     _todayTaskList.clear();
-    for (Task task in _taskList){
-      if(task.time.day == DateTime.now().day){
+    for (Task task in _taskList) {
+      if (task.time.day == DateTime.now().day) {
         _todayTaskList.add(task);
       }
     }
   }
 
-  void _initUpComingList(){
+  void _initUpComingList() {
     _upcomingTaskList.clear();
-    for (Task task in _taskList){
-      if(task.time.day == DateTime.now().day+1){
+    for (Task task in _taskList) {
+      if (task.time.day == DateTime.now().day + 1) {
         _upcomingTaskList.add(task);
       }
     }
@@ -37,30 +56,33 @@ class HomeViewModel with ChangeNotifier {
     _taskList.add(task);
     _initTodayList();
     _initUpComingList();
+    taskDatabase.saveTaskList(_taskList, "taskList");
   }
 
-  void addDoneTask(Task task){
+  void addDoneTask(Task task) {
     _doneTaskList.add(task);
+    taskDatabase.saveTaskList(_doneTaskList, "doneList");
   }
 
-  void deleteDoneTask(Task task){
+  void deleteDoneTask(Task task) {
     for (Task item in _doneTaskList) {
       if (item.id == task.id) {
         _doneTaskList.remove(item);
         break;
       }
     }
+    taskDatabase.saveTaskList(_doneTaskList, "doneList");
   }
 
   List<Task> getTaskList() {
     return _taskList;
   }
 
-  List<Task> getTodayTaskList(){
+  List<Task> getTodayTaskList() {
     return _todayTaskList;
   }
 
-  List<Task> getUpcomingTaskList(){
+  List<Task> getUpcomingTaskList() {
     return _upcomingTaskList;
   }
 
@@ -72,7 +94,6 @@ class HomeViewModel with ChangeNotifier {
     return _doneTaskList;
   }
 
-
   void deleteTask(Task task) {
     for (Task item in _taskList) {
       if (item.id == task.id) {
@@ -82,6 +103,7 @@ class HomeViewModel with ChangeNotifier {
         break;
       }
     }
+    taskDatabase.saveTaskList(_taskList, "taskList");
   }
 
   void search(String value, List<Task> taskListToSearch) {

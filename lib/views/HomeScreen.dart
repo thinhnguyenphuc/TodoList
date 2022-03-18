@@ -1,12 +1,16 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:todolist/viewModels/HomeViewModel.dart';
 import 'package:todolist/views/AddTaskScreen.dart';
 import 'package:todolist/views/TaskViewItem.dart';
 
 import '../models/Task.dart';
+import '../notification/Notification.dart';
 import '../resources/Strings.dart';
-import '../resources/nums.dart';
-import '../widgets/custom_input_button.dart';
+import '../resources/Nums.dart';
+import '../widgets/CustomInputButton.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,6 +31,8 @@ class _MyHomePageState extends State<HomeScreen> {
   Duration duration = const Duration(milliseconds: 100);
   Color textColor = Colors.green;
   TextEditingController searchController = TextEditingController();
+  bool isHasNotification = false;
+  Task? upcomingTask;
 
   void delete(Task task) {
     if (_isDoneTask) {
@@ -47,17 +53,23 @@ class _MyHomePageState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     Insets insets = Insets.of(context);
 
+    if(!_homeViewModel.isLoaded()){
+      Future.delayed(const Duration(milliseconds: 500), () {
+        setState(() {
+        });
+      });
+    }
+
     final addButton = FloatingActionButton(
       elevation: 0.0,
       child: const Icon(Icons.add),
       backgroundColor: Colors.orange,
       onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  AddTaskScreen(homeViewModel: _homeViewModel),
-            ));
+        NotificationAPI.showNotification(
+          title: "1",
+          body: "1",
+          payload: 'none',
+        );
       },
     );
 
@@ -69,6 +81,8 @@ class _MyHomePageState extends State<HomeScreen> {
       });
     }
 
+
+
     List<Task> getTaskList() {
       return _isTodayTask
           ? _homeViewModel.getTodayTaskList()
@@ -78,6 +92,30 @@ class _MyHomePageState extends State<HomeScreen> {
                   ? _homeViewModel.getDoneTaskList()
                   : _homeViewModel.getTaskList();
     }
+    if(isHasNotification){
+      if(upcomingTask?.time.minute == DateTime.now().minute) {
+        NotificationAPI.showNotification(
+          title: upcomingTask?.title,
+          body: upcomingTask?.description,
+          payload: 'none',
+        );
+      }
+    } else {
+      if(upcomingTask == null){
+        for(Task task in getTaskList()){
+          if(task.time.subtract(const Duration(minutes: 10)).minute == DateTime.now().minute){
+            isHasNotification = true;
+            upcomingTask = task;
+          }
+        }
+      } else {
+        Future.delayed(const Duration(milliseconds: 60000), () {
+          setState(() {
+          });
+        });
+      }
+    }
+
 
     Widget _allTask() {
       return GridView.builder(

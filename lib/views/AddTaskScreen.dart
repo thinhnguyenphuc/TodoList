@@ -20,6 +20,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final bool _inSync = false;
   String? _taskError;
 
+
   DateTime selectedDate = DateTime.now();
   TimeOfDay _time = TimeOfDay.now();
 
@@ -80,7 +81,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         description: _taskDesController.value.text,
                         time: DateFormat("yyyy-MM-dd hh:mm")
                             .parse(dateTime));
-                    HomeViewModel().addTask(task);
+                    widget.homeViewModel.addTask(task);
                     Navigator.pop(context);
                   },
                 )

@@ -64,13 +64,14 @@ class TaskViewItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
               ),
-              if(!isDone) Expanded(
-                child: Align(
-                  alignment: FractionalOffset.bottomRight,
-                  child: TextButton(
-                      onPressed: onDoneClick, child: const Text("Done")),
+              if (!isDone)
+                Expanded(
+                  child: Align(
+                    alignment: FractionalOffset.bottomRight,
+                    child: TextButton(
+                        onPressed: onDoneClick, child: const Text("Done")),
+                  ),
                 ),
-              ),
             ],
           ),
         ));

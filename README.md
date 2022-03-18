@@ -12,4 +12,4 @@
 
 - Đánh dầu 1 TODO đã xong và remove khỏi danh sách TODO
 
-- Yêu cầu sử dụng Local Storage để lưu trữ danh sách TODO, nếu ứng dụng tắt đi thì TODO vẫn còn lưu trư khi chạy lại.
+- Yêu cầu sử dụng Local Storage để lưu trữ danh sách TODO, nếu ứng dụng tắt đi thì TODO vẫn còn lưu trữ khi chạy lại.
