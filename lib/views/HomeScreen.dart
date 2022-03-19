@@ -31,8 +31,24 @@ class _MyHomePageState extends State<HomeScreen> {
   Duration duration = const Duration(milliseconds: 100);
   Color textColor = Colors.green;
   TextEditingController searchController = TextEditingController();
-  bool isHasNotification = false;
   Task? upcomingTask;
+  DateTime reloadTime = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+
+    NotificationAPI.init();
+    listenNotifications();
+  }
+
+  void listenNotifications() =>
+      NotificationAPI.onNotifications.stream.listen(inClickedNotification);
+
+  void inClickedNotification(String? payload) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const HomeScreen()));
+  }
 
   void delete(Task task) {
     if (_isDoneTask) {
@@ -51,12 +67,25 @@ class _MyHomePageState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (DateTime.now().subtract(const Duration(minutes: 1)) == reloadTime) {
+      reloadTime = DateTime.now();
+      setState(() {});
+    }
+    for (Task task in _homeViewModel.getUpcomingTaskList()) {
+      if (DateTime.now().isBefore(task.time) && DateTime.now().difference(task.time).inMinutes <=10) {
+        NotificationAPI.showScheduledNotification(
+            title: task.title,
+            body: task.description,
+            payload: "no",
+            scheduledDate: task.time);
+      }
+    }
+
     Insets insets = Insets.of(context);
 
-    if(!_homeViewModel.isLoaded()){
+    if (!_homeViewModel.isLoaded()) {
       Future.delayed(const Duration(milliseconds: 500), () {
-        setState(() {
-        });
+        setState(() {});
       });
     }
 
@@ -65,11 +94,11 @@ class _MyHomePageState extends State<HomeScreen> {
       child: const Icon(Icons.add),
       backgroundColor: Colors.orange,
       onPressed: () {
-        NotificationAPI.showNotification(
-          title: "1",
-          body: "1",
-          payload: 'none',
-        );
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    AddTaskScreen(homeViewModel: _homeViewModel)));
       },
     );
 
@@ -81,8 +110,6 @@ class _MyHomePageState extends State<HomeScreen> {
       });
     }
 
-
-
     List<Task> getTaskList() {
       return _isTodayTask
           ? _homeViewModel.getTodayTaskList()
@@ -92,30 +119,6 @@ class _MyHomePageState extends State<HomeScreen> {
                   ? _homeViewModel.getDoneTaskList()
                   : _homeViewModel.getTaskList();
     }
-    if(isHasNotification){
-      if(upcomingTask?.time.minute == DateTime.now().minute) {
-        NotificationAPI.showNotification(
-          title: upcomingTask?.title,
-          body: upcomingTask?.description,
-          payload: 'none',
-        );
-      }
-    } else {
-      if(upcomingTask == null){
-        for(Task task in getTaskList()){
-          if(task.time.subtract(const Duration(minutes: 10)).minute == DateTime.now().minute){
-            isHasNotification = true;
-            upcomingTask = task;
-          }
-        }
-      } else {
-        Future.delayed(const Duration(milliseconds: 60000), () {
-          setState(() {
-          });
-        });
-      }
-    }
-
 
     Widget _allTask() {
       return GridView.builder(

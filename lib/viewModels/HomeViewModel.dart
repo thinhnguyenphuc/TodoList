@@ -46,7 +46,7 @@ class HomeViewModel with ChangeNotifier {
   void _initUpComingList() {
     _upcomingTaskList.clear();
     for (Task task in _taskList) {
-      if (task.time.day == DateTime.now().day + 1) {
+      if (DateTime.now().isBefore(task.time)) {
         _upcomingTaskList.add(task);
       }
     }
