@@ -67,7 +67,7 @@ class _MyHomePageState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (DateTime.now().subtract(const Duration(minutes: 1)) == reloadTime) {
+    if (DateTime.now().isAfter(reloadTime) && DateTime.now().difference(reloadTime).inSeconds == 10) {
       reloadTime = DateTime.now();
       setState(() {});
     }
